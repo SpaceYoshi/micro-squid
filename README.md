@@ -1,2 +1,2 @@
 # micro-squid
-Game of statues, also known as Red Light, Green Light on the ATmega128 microcontroller.
+Game of Statues, also known as Red Light, Green Light using the ATmega128 microcontroller.
