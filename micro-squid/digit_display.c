@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <stdlib.h>
 #include "digit_display.h"
 #include "util.h"
 
