@@ -1,4 +1,6 @@
+#include "util.h"
 #include <avr/io.h>
+#include <util/delay.h>
 #include "onboard_lcd.h"
 
 #define LCD_EN 3
@@ -57,7 +59,9 @@ void onboard_lcd_set_cursor(unsigned int pos) {
 	onboard_lcd_send_cmd(0x80 + pos);
 }
 
-void onboard_lcd_show_str(char *str) {
+void onboard_lcd_set_str(char *str) {
+	onboard_lcd_send_cmd(0x01);
+
 	for (; *str; str++) {
 		PORTC = *str & 0xF0;
 		PORTC |= (1 << LCD_RS);
@@ -67,4 +71,8 @@ void onboard_lcd_show_str(char *str) {
 		PORTC |= (1 << LCD_RS);
 		lcd_send_byte();
 	}
+}
+
+void onboard_lcd_clear(void) {
+	onboard_lcd_send_cmd(0x01);
 }

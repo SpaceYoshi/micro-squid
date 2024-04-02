@@ -1,65 +1,83 @@
 #include "util.h"
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include "us100.h"
 #include "digit_display.h"
 #include "onboard_lcd.h"
 
-#define GREEN_LED PB0
-#define RED_LED PB1
-#define BUZZ_PIN PB2
+#define GREEN_LED PA0
+#define RED_LED PA1
+#define BUZZ_PIN PC0
 #define DETECT_DIST 450
 
 // How much difference in distance to accept
 // before registering it as movement.
 #define MOVE_THRESHOLD 0
 
-void init_leds() {
+// 0: Red light, 1: Green light
+volatile uint8_t state = 1;
+
+ISR(TIMER1_OVF_vect) {
+	PORTE ^= 1;
+	TCNT1 = 65536 - 23438;
+	
+	state = (state == 0 ? 1 : 0);
+}
+
+void int_timer_init(void) {
+	DDRE = 1;
+	TCCR1B |= BIT(CS12) | BIT(CS10);
+	TCNT1 = 65536 - 23438;
+	TIMSK |= BIT(TOIE1);
+	sei();
+}
+
+void leds_init(void) {
   // Set LED pins as output
-  DDRB |= (1 << GREEN_LED) | (1 << RED_LED) | (1 << BUZZ_PIN);
+  DDRA |= (1 << GREEN_LED) | (1 << RED_LED);
+}
+
+void buzzer_init(void) {
+	DDRC |= BIT(BUZZ_PIN);
 }
 
 void play_buzzer() {
-  PORTB |= (1 << BUZZ_PIN);
+  PORTC |= BIT(BUZZ_PIN);
   _delay_ms(200);
-  PORTB &= ~(1 << BUZZ_PIN);
+  PORTC &= ~BIT(BUZZ_PIN);
 }
 
-void handle_state(int state) {
+void switch_led() {
   if (state == 0) {
     // Red light state
-    PORTB |= (1 << RED_LED);
-    PORTB &= ~(1 << GREEN_LED);
-
-    state = 1;
-
-    _delay_ms(3000);
+    PORTA |= (1 << RED_LED);
+    PORTA &= ~(1 << GREEN_LED);
   } else {
     // Green light state
-    PORTB |= (1 << GREEN_LED);
-    PORTB &= ~(1 << RED_LED);
+    PORTA |= (1 << GREEN_LED);
+    PORTA &= ~(1 << RED_LED);
 
-    state = 0;
-
-    // Green light duration (3 to 6 seconds)
-	for (int i = 0; i < 3000 + rand() % 3000; i++) {
-		_delay_ms(1);
-	}
   }
-
 }
 
 int main() {
   us100_init();
-  init_leds();
+  leds_init();
+  buzzer_init();
+  onboard_lcd_init();
+  digit_display_init();
+  int_timer_init();
 
-  // 0: Red light, 1: Green light
-  uint8_t state = 1; 
   uint16_t prev_dist = 0;
   uint16_t curr_dist = 0;
 
   while (1) {
+    switch_led(state);
+
     curr_dist = us100_get_dist_cm();
 
     if (curr_dist > DETECT_DIST) continue;
@@ -73,22 +91,21 @@ int main() {
     // Update previous distance
     prev_dist = curr_dist;
 
-    handle_state(state);
   }
 
-  onboard_lcd_show_str("Bro literally died");
+  onboard_lcd_set_str("yoU deth'd (x_X)");
 
-  PORTB &= ~BIT(GREEN_LED);
-  PORTB &= ~BIT(RED_LED);
+  PORTA &= ~BIT(GREEN_LED);
+  PORTA &= ~BIT(RED_LED);
 
   while (1) {
     // Player eliminated
-    PORTB &= ~BIT(GREEN_LED);
-    PORTB |= BIT(RED_LED);
+    PORTA &= ~BIT(GREEN_LED);
+    PORTA |= BIT(RED_LED);
     _delay_ms(300);
 
-    PORTB &= ~BIT(RED_LED);
-    PORTB |= BIT(GREEN_LED);
+    PORTA &= ~BIT(RED_LED);
+    PORTA |= BIT(GREEN_LED);
     _delay_ms(300);
   }
 

@@ -7,6 +7,8 @@ void onboard_lcd_init(void);
 
 void onboard_lcd_set_cursor(unsigned int pos);
 
-void onboard_lcd_show_str(char *str);
+void onboard_lcd_set_str(char *str);
+
+void onboard_lcd_clear(void);
 
 #endif /* LCD_H_ */

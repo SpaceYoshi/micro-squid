@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include "us100.h"
 
+#define TRIG_PIN PD0
+#define ECHO_PIN PD1
+
 void us100_init(void) {
   // Set trigger pin as output
   DDRD |= (1 << TRIG_PIN);
