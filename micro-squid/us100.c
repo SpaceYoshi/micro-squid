@@ -4,21 +4,21 @@
 #include <stdint.h>
 #include "us100.h"
 
-#define TRIG_PIN PD0
-#define ECHO_PIN PD1
+#define TRIG_PIN PA0
+#define ECHO_PIN PA1
 
 void us100_init(void) {
   // Set trigger pin as output
-  DDRD |= (1 << TRIG_PIN);
+  DDRA |= (1 << TRIG_PIN);
   // Set echo pin as input
-  DDRD &= ~(1 << ECHO_PIN);
+  DDRA &= ~(1 << ECHO_PIN);
 }
 
 void us100_trigger_pulse(void) {
   // Generate 10us pulse on trigger pin
-  PORTD |= (1 << TRIG_PIN);
+  PORTA |= (1 << TRIG_PIN);
   _delay_us(10);
-  PORTD &= ~(1 << TRIG_PIN);
+  PORTA &= ~(1 << TRIG_PIN);
 }
 
 uint16_t us100_get_dist_cm(void) {
@@ -28,10 +28,10 @@ uint16_t us100_get_dist_cm(void) {
   us100_trigger_pulse();
 
   // Measure pulse width, Wait for echo pin to go high
-  while (!(PIND & (1 << ECHO_PIN)))
+  while (!(PINA & (1 << ECHO_PIN)))
     ;
 
-  while (PIND & (1 << ECHO_PIN))
+  while (PINA & (1 << ECHO_PIN))
     pulse_width++;
 
   // Convert pulse width to cm
