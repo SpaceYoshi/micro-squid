@@ -153,6 +153,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="rgb_led.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="rgb_led.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="servo.c">
       <SubType>compile</SubType>
     </Compile>
