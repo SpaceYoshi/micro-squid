@@ -24,7 +24,7 @@
 // 0: Red light, 1: Green light
 volatile uint8_t state = 1;
 uint8_t prev_state = 1;
-uint16_t prev_dist = 0;
+int prev_dist = 0;
 
 ISR(TIMER3_OVF_vect) {
 	TCNT3 = 65536 - 23438;
