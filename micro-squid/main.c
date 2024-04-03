@@ -10,6 +10,7 @@
 #include "digit_display.h"
 #include "onboard_lcd.h"
 #include "servo.h"
+#include "rgb_led.h"
 
 #define GREEN_LED PA1
 #define RED_LED PA0
@@ -18,7 +19,7 @@
 
 // How much difference in distance to accept
 // before registering it as movement.
-#define MOVE_THRESHOLD 5
+#define MOVE_THRESHOLD 15
 
 // 0: Red light, 1: Green light
 volatile uint8_t state = 1;
@@ -35,7 +36,6 @@ void int_timer_init(void) {
 	TCCR3B |= BIT(CS32) | BIT(CS30);
 	TCNT3 = 65536 - 23438;
 	ETIMSK |= BIT(TOIE3);
-	sei();
 }
 
 void leds_init(void) {
@@ -57,6 +57,7 @@ void switch_state() {
 	if (state == 0) {
 		if (prev_state != state) {
 			prev_dist = -1;	
+			rgb_led_set_clr(128, 0);
 			servo_turn(SERVO_OBSERVING);
 			prev_state = state;
 		}
@@ -66,6 +67,7 @@ void switch_state() {
 		PORTA &= ~(1 << GREEN_LED);
 	} else {
 		if (prev_state != state) {
+			rgb_led_set_clr(0, 128);
 			servo_turn(SERVO_LOOKING_AWAY);
 			prev_state = state;	
 		}
@@ -84,8 +86,12 @@ int main() {
   digit_display_init();
   int_timer_init();
   servo_init();
+	rgb_led_init();
+
+	sei();
 
   uint16_t curr_dist = 0;
+  rgb_led_set_clr(0, 128);
 
   while (1) {
     switch_state(state);
@@ -110,6 +116,7 @@ int main() {
   }
 
   onboard_lcd_set_str("yoU deth'd (x_X)");
+  rgb_led_set_clr(128, 60);
 
   PORTA |= BIT(GREEN_LED);
   PORTA |= BIT(RED_LED);

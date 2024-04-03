@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include "us100.h"
 
-#define TRIG_PIN PA0
-#define ECHO_PIN PA1
+#define TRIG_PIN PD4
+#define ECHO_PIN PD5
 
 void us100_init(void) {
   // Set trigger pin as output
